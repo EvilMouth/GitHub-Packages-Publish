@@ -1,0 +1,27 @@
+apply plugin: 'maven-publish'
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def user = properties.getProperty("gpr.user")
+def key = properties.getProperty("gpr.key")
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/${user}/${POM_UPLOAD_NAME}")
+            credentials {
+                username = user ?: System.getenv("GPR_USER")
+                password = key ?: System.getenv("GPR_KEY")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            groupId POM_GROUP_ID
+            artifactId POM_ARTIFACT_ID
+            version POM_PUBLISH_VERSION
+            artifact("${buildDir}/outputs/aar/${POM_ARTIFACT_ID}-release.aar")
+        }
+    }
+}
